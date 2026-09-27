@@ -1,0 +1,18 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "hci-demo",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-09-01",
+  "assets": { "directory": "./public" },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "hci-demo",
+      "database_id": "11269164-4fc1-42e0-be56-15722283faea",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "ratelimits": [
+    { "name": "LIMITER", "namespace_id": "4201", "simple": { "limit": 30, "period": 60 } }
+  ]
+}

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f6fb">
+  <title>Error Messages Demo</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>😐</text></svg>">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="theme-neutral">
+  <header class="topbar" hidden>
+    <ol class="progress" aria-label="Progress">
+      <li>1</li><li>2</li><li>3</li><li>4</li>
+    </ol>
+    <div class="stress" aria-hidden="true">
+      <span class="stress-face">😐</span>
+      <span class="stress-track"><span class="stress-fill"></span></span>
+    </div>
+  </header>
+
+  <main id="app" tabindex="-1"></main>
+
+  <div class="flash" aria-hidden="true"></div>
+
+  <dialog id="bad-modal" class="win95 modal95">
+    <div class="win-title">System Error</div>
+    <div class="modal-body">
+      <span class="x-icon" aria-hidden="true">✕</span>
+      <p>ERROR 409: INVALID INPUT. REGISTRATION FAILED.</p>
+    </div>
+    <form method="dialog"><button class="btn95">OK</button></form>
+  </dialog>
+
+  <footer class="footer">HCI demo: Error Messages and Emotional Impact.</footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>
