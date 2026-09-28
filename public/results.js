@@ -98,7 +98,8 @@ const feelChart = new Chart($('chart-feel'), {
       y: { min: 0, max: 5, ticks: { stepSize: 1, callback: (v) => (v ? `${FACES[v - 1]} ${v}` : '') } },
       x: { grid: { display: false } },
     },
-    plugins: { valueLabels: { format: (v) => v.toFixed(1) } },
+    // Legend below the axis: a 5.0 bar's value label sits where a top legend would be.
+    plugins: { legend: { position: 'bottom', align: 'center' }, valueLabels: { format: (v) => v.toFixed(1) } },
   },
 });
 
