@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f6fb">
+  <title>Emotion Quiz</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="theme-neutral quiz-page">
+  <header class="topbar quiz-bar" hidden>
+    <div class="me"><span class="me-avatar"></span><span class="me-name"></span><span class="me-score"></span></div>
+    <div class="stress" aria-hidden="true">
+      <span class="stress-face">😐</span>
+      <span class="stress-track"><span class="stress-fill"></span></span>
+    </div>
+  </header>
+
+  <main id="app" tabindex="-1"></main>
+
+  <div class="flash" aria-hidden="true"></div>
+
+  <dialog id="join" class="join-dialog" aria-labelledby="join-title">
+    <form method="dialog" novalidate>
+      <p class="eyebrow">Emotion quiz</p>
+      <h2 id="join-title">Pick a nickname and an avatar</h2>
+      <div>
+        <label for="q-nick" class="lbl">Nickname</label>
+        <input id="q-nick" class="text" maxlength="20" autocomplete="off" autocapitalize="words" aria-describedby="q-nick-msg" required>
+        <p class="msg" id="q-nick-msg" aria-live="polite"></p>
+      </div>
+      <fieldset class="avatars">
+        <legend class="lbl">Avatar</legend>
+        <div class="avatar-grid"></div>
+      </fieldset>
+      <p class="hint">Your nickname and avatar appear on the class leaderboard.</p>
+      <button class="btn primary" value="join">Join quiz</button>
+    </form>
+  </dialog>
+
+  <dialog id="bad-modal" class="win95 modal95">
+    <div class="win-title">Quiz.exe</div>
+    <div class="modal-body">
+      <span class="x-icon" aria-hidden="true">✕</span>
+      <p></p>
+    </div>
+    <form method="dialog"><button class="btn95">OK</button></form>
+  </dialog>
+
+  <footer class="footer">HCI demo: Emotion quiz.</footer>
+
+  <script src="/quiz.js"></script>
+</body>
+</html>
