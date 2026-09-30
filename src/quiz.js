@@ -142,7 +142,8 @@ async function state(req, env) {
     question: Q && phase !== 'lobby' ? { text: Q.text, options: Q.options } : null,
     me: null,
   };
-  if (phase === 'lobby') out.roster = players.slice(-60).map((p) => ({ nickname: p.nickname, avatar: p.avatar }));
+  // Scores here hide the open question's points, and "answered" says nothing about right or wrong.
+  out.roster = players.slice(-100).map((p) => ({ nickname: p.nickname, avatar: p.avatar, score: p.score, answered: p.choice != null }));
   if (revealed && Q) {
     out.correct = Q.answer;
     out.why = Q.why;
@@ -205,6 +206,13 @@ async function control(req, env) {
   } else if (b?.action === 'close') {
     await db.prepare(`UPDATE quiz_state SET started_at = ?1 WHERE id = 1 AND phase = 'question' AND started_at > ?1`)
       .bind(now - LIMIT_MS).run();
+  } else if (b?.action === 'kick' && typeof b.nickname === 'string' && typeof b.avatar === 'string') {
+    // Players are listed by nickname and avatar only; the pid stays private because it is what lets a phone answer.
+    const who = 'SELECT pid FROM quiz_players WHERE nickname = ?1 AND avatar = ?2';
+    await db.batch([
+      db.prepare(`DELETE FROM quiz_answers WHERE pid IN (${who})`).bind(b.nickname, b.avatar),
+      db.prepare('DELETE FROM quiz_players WHERE nickname = ?1 AND avatar = ?2').bind(b.nickname, b.avatar),
+    ]);
   } else if (b?.action === 'reset') {
     await db.batch([
       db.prepare('DELETE FROM quiz_answers'),

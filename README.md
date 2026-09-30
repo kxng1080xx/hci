@@ -6,7 +6,7 @@ After each task they rate how the error made them feel. The presenter projects `
 
 - `public/` has the front end: plain HTML, CSS and JS with no build step (`index.html` for students, `results.html` for the projector).
 - `src/worker.js` is the Cloudflare Worker API; `src/validate.js` does server-side validation.
-- `public/quiz.html` is the live quiz for phones, and `public/quiz-host.js` runs the "Quiz results" dialog on `/results`.
+- `public/quiz.html` is the live quiz for phones. `public/game.html` is the host page, and `public/quiz-host.js` runs it and the "Quiz results" dialog on `/results`.
 - `src/quiz.js` holds the quiz questions, answer key and API. `src/http.js` has helpers the two APIs share.
 - `migrations/` has the D1 schema.
 
@@ -23,7 +23,7 @@ Only the feelings answers and auto-recorded metrics are stored. Nothing typed in
 | `GET /api/quiz` | Current quiz state. The correct answer and scores for a question appear only after it closes |
 | `POST /api/quiz/join` | Joins the quiz with a nickname and an avatar |
 | `POST /api/quiz/answer` | Locks in an answer. Only the first answer counts, and points are set by the server's clock |
-| `POST /api/quiz/control` | Host only (`x-admin-key`): `next`, `close` (end the question now) or `reset` |
+| `POST /api/quiz/control` | Host only (`x-admin-key`): `next`, `close` (end the question now), `kick` (remove a player) or `reset` |
 
 Rate limit: 30 requests per minute per participant ID, using the Workers rate limiting binding.
 
@@ -80,8 +80,10 @@ If Windows Firewall asks about Node or workerd, allow it on private networks. Ot
 ## Running the quiz
 
 1. If you deployed before the quiz existed, run `npx wrangler d1 migrations apply hci-demo --remote` once, then `npx wrangler deploy`.
-2. On `/results`, press **Quiz results**. Press **Reset quiz** to clear old players.
-3. Students open `/quiz` (the dialog shows the link and a QR code), then pick a nickname and an avatar.
+2. Open `/game` on your laptop. This is the host page: it shows the join link and QR code, everyone who joins, and the controls.
+   Press **Reset quiz** to clear old players. The ✕ next to a player removes them, for example if their nickname is rude.
+   The same views and controls are also in the **Quiz results** dialog on `/results`.
+3. Students open `/quiz`, then pick a nickname and an avatar. While a question is open, the players list shows ✓ next to each player who has answered.
 4. Press **Start quiz**. Each question has a 4 second "get ready" countdown, then 20 seconds to answer.
    The question closes early when everyone has answered, or when you press **End question now**.
 5. After each question, phones show the feedback. A correct answer gets calm "good design" feedback: a tick, confetti, points and why the answer is right.

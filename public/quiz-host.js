@@ -1,14 +1,22 @@
 'use strict';
-// Quiz dialog on the projector page. Uses $, reduced, adminKey and session from results.js.
-// Add ?quiz=<url> to the results URL to show a custom short link for the quiz.
+// Quiz host views and controls. Runs as the "Quiz results" dialog on /results, and as the full /game page
+// (where #quiz is a plain element rather than a <dialog>, so it runs straight away).
+// Add ?quiz=<url> to either URL to show a custom short link for the quiz.
 
 (() => {
-  const dlg = $('quiz'), body = $('qd-body'), nextBtn = $('qd-next'), endBtn = $('qd-end'), status = $('qd-status');
+  const $ = (id) => document.getElementById(id);
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const session = {
+    get() { try { return sessionStorage.getItem('hci_admin') || ''; } catch { return ''; } },
+    set(v) { try { v ? sessionStorage.setItem('hci_admin', v) : sessionStorage.removeItem('hci_admin'); } catch {} },
+  };
+  const dlg = $('quiz'), standalone = dlg.tagName !== 'DIALOG', side = $('qd-players'), body = $('qd-body'), nextBtn = $('qd-next'), endBtn = $('qd-end'), status = $('qd-status');
   const SHAPES = ['▲', '◆', '●', '■'];
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
   const fmt = (n) => n.toLocaleString('en');
   const quizUrl = new URLSearchParams(location.search).get('quiz') || location.origin + '/quiz';
 
+  let adminKey = session.get();
   let S = null, offset = 0, key = '', view = null, pollTimer = null, tickTimer = null, seen = new Set();
 
   async function poll() {
@@ -24,7 +32,7 @@
     } catch {
       status.textContent = 'Reconnecting…';
     }
-    if (dlg.open) pollTimer = setTimeout(poll, 1000);
+    if (standalone || dlg.open) pollTimer = setTimeout(poll, 1000);
   }
 
   function phaseNow() {
@@ -45,6 +53,33 @@
     }
     view.update?.();
     controls(phase);
+    players(phase);
+  }
+
+  // /game only: everyone who joined, whether they've answered yet, and a way to remove a rude nickname.
+  let sideKey = '';
+  function players(phase) {
+    if (!side) return;
+    const open = phase === 'ready' || phase === 'question' || phase === 'timeup';
+    const list = phase === 'lobby' ? S.roster : [...S.roster].sort((a, b) => b.score - a.score);
+    const k = phase + JSON.stringify(list);
+    if (k === sideKey) return;
+    sideKey = k;
+    $('qd-players-n').textContent = S.players;
+    $('qd-players-list').replaceChildren(...list.map((p) => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span class="av" aria-hidden="true">${esc(p.avatar)}</span><span class="nm"></span>
+        <span class="st">${open ? (p.answered ? '<span class="yes" title="Answered">✓</span>' : '<span class="no" title="Not answered yet">…</span>') : fmt(p.score)}</span>
+        <button type="button" class="kick" title="Remove player">✕</button>`;
+      li.querySelector('.nm').textContent = p.nickname;
+      li.querySelector('.kick').setAttribute('aria-label', `Remove ${p.nickname}`);
+      li.querySelector('.kick').onclick = () => {
+        if (confirm(`Remove ${p.nickname} from the quiz? Their phone will ask them to join again.`)) {
+          send('kick', { nickname: p.nickname, avatar: p.avatar });
+        }
+      };
+      return li;
+    }));
   }
 
   function controls(phase) {
@@ -205,14 +240,19 @@
     if (confirm('Reset the quiz? This removes every player and score.')) { seen = new Set(); send('reset'); }
   };
 
-  $('quiz-open').onclick = () => {
-    dlg.showModal();
-    key = '';
+  if (standalone) {
     poll();
     tickTimer = setInterval(tick, 200);
-  };
-  $('qd-x').onclick = () => dlg.close();
-  dlg.addEventListener('close', () => { clearTimeout(pollTimer); clearInterval(tickTimer); });
+  } else {
+    $('quiz-open').onclick = () => {
+      dlg.showModal();
+      key = '';
+      poll();
+      tickTimer = setInterval(tick, 200);
+    };
+    $('qd-x').onclick = () => dlg.close();
+    dlg.addEventListener('close', () => { clearTimeout(pollTimer); clearInterval(tickTimer); });
+  }
 
   function $$(sel, root) { return [...root.querySelectorAll(sel)]; }
 })();
